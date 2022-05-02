@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.ArrayList;
-
 import static org.springframework.http.HttpStatus.*;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -45,7 +43,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         methodArgumentNotValidException.getFieldErrors()
                 .forEach(fieldError -> {
                     ApiSubError apiValidationError = new ApiValidationError(fieldError.getObjectName(),fieldError.getField(),fieldError.getRejectedValue(),fieldError.getDefaultMessage());
-                    apiError.addSubErrer(apiValidationError);
+                    apiError.addSubError(apiValidationError);
                 });
         return buildResponseEntity(apiError);
     }

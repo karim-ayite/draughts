@@ -41,7 +41,7 @@ public class ApiError {
         this.debugMessage = ex.getLocalizedMessage();
     }
 
-    public void addSubErrer(ApiSubError apiSubError){
+    public void addSubError(ApiSubError apiSubError){
         this.getSubErrors().add(apiSubError);
     }
 }

@@ -1,6 +1,7 @@
 package fr.codeflow.draughtsapi.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.codeflow.draughtsapi.model.DraughtsRules;
 import fr.codeflow.draughtsapi.model.NewGameRequest;
 import fr.codeflow.draughtsapi.model.PiecesColors;
 import fr.codeflow.draughtsapi.model.Player;
@@ -37,6 +38,8 @@ class GameControllerTest {
         player2.setPiecesColors(PiecesColors.LIGHT);
         aNewGame.setPlayer2(player2);
 
+        aNewGame.setRules(DraughtsRules.INTERNATIONAL);
+
         this.mockMvc.perform(post("/games")
                         .content(asJsonString(aNewGame))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -50,16 +53,28 @@ class GameControllerTest {
     }
 
     @Test
-    public void Should_ReturnValidationError_When_PlayerAreMissing() throws Exception {
+    public void Should_ReturnValidationError_When_NewGameRequestIsEmpty() throws Exception {
         var aNewGame = new NewGameRequest();
-
 
         this.mockMvc.perform(post("/games")
                         .content(asJsonString(aNewGame))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'rules')]").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'rules')].object").value("newGameRequest"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'rules')].rejectedValue").value(IsNull.nullValue()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'player2')]").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'player2')].object").value("newGameRequest"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'player1')]").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'player1')].object").value("newGameRequest"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'rules')].rejectedValue").value("rules"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[0].rejectedValue").value("null"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[1].object").value("newGameRequest"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[1].field").value("player2"))
+                ;
+
     }
 
     public static String asJsonString(final Object obj) {
