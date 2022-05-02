@@ -1,5 +1,7 @@
 package fr.codeflow.draughtsapi.exception;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -12,15 +14,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.util.Locale;
+
 import static org.springframework.http.HttpStatus.*;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
+    @Autowired
+    private MessageSource messageSource;
+
    @Override
    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-       String error = "Malformed JSON request";
+       String error = messageSource.getMessage("labels.malformedJson",null,Locale.getDefault());
        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error, ex));
    }
 
@@ -29,8 +36,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
    }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    protected ResponseEntity<Object> handleEntityNotFound(
-            EntityNotFoundException ex) {
+    protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
         ApiError apiError = new ApiError(NOT_FOUND);
         apiError.setMessage(ex.getMessage());
         return buildResponseEntity(apiError);
@@ -39,12 +45,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException methodArgumentNotValidException, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ApiError apiError = new ApiError(BAD_REQUEST);
-        apiError.setMessage("Request validation errors");
+        apiError.setMessage(messageSource.getMessage("labels.validationErrors",null, Locale.getDefault()));
+
         methodArgumentNotValidException.getFieldErrors()
                 .forEach(fieldError -> {
                     ApiSubError apiValidationError = new ApiValidationError(fieldError.getObjectName(),fieldError.getField(),fieldError.getRejectedValue(),fieldError.getDefaultMessage());
                     apiError.addSubError(apiValidationError);
                 });
+
         return buildResponseEntity(apiError);
     }
 
