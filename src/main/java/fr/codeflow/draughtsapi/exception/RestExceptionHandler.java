@@ -11,6 +11,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -26,6 +27,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     private MessageSource messageSource;
 
    @Override
+   @ResponseStatus(NOT_FOUND)
    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
        String error = messageSource.getMessage("labels.malformedJson",null,Locale.getDefault());
        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error, ex));
@@ -36,6 +38,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
    }
 
     @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(NOT_FOUND)
     protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
         ApiError apiError = new ApiError(NOT_FOUND);
         apiError.setMessage(ex.getMessage());
@@ -43,6 +46,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException methodArgumentNotValidException, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ApiError apiError = new ApiError(BAD_REQUEST);
         apiError.setMessage(messageSource.getMessage("labels.validationErrors",null, Locale.getDefault()));

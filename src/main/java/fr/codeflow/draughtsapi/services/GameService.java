@@ -1,7 +1,7 @@
 package fr.codeflow.draughtsapi.services;
 
 import fr.codeflow.draughtsapi.factories.InternationalRulesGameFactory;
-import fr.codeflow.draughtsapi.model.AbstractGame;
+import fr.codeflow.draughtsapi.model.DraughtsGame;
 import fr.codeflow.draughtsapi.model.NewGameRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ public class GameService {
     @Autowired
     private InternationalRulesGameFactory gameFactory;
 
-    public AbstractGame createNewGame(NewGameRequest newGameRequest) {
+    public DraughtsGame createNewGame(NewGameRequest newGameRequest) {
         return gameFactory.createGame(newGameRequest.getPlayer1(),newGameRequest.getPlayer2());
     }
 }
