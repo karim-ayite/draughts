@@ -1,6 +1,7 @@
 package fr.codeflow.draughtsapi.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.codeflow.draughtsapi.JSonUtils;
 import fr.codeflow.draughtsapi.model.DraughtsRules;
 import fr.codeflow.draughtsapi.model.NewGameRequest;
 import fr.codeflow.draughtsapi.model.PiecesColors;
@@ -41,7 +42,7 @@ class GameControllerTest {
         aNewGame.setRules(DraughtsRules.INTERNATIONAL);
 
         this.mockMvc.perform(post("/games")
-                        .content(asJsonString(aNewGame))
+                        .content(JSonUtils.asJsonString(aNewGame))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -49,7 +50,8 @@ class GameControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.player1.username").value("duke"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.player1.piecesColors").value("DARK"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.player2.username").value("nukem"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.player2.piecesColors").value("LIGHT"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.player2.piecesColors").value("LIGHT"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.board.squares").exists());
     }
 
     @Test
@@ -57,7 +59,7 @@ class GameControllerTest {
         var aNewGame = new NewGameRequest();
 
         this.mockMvc.perform(post("/games")
-                        .content(asJsonString(aNewGame))
+                        .content(JSonUtils.asJsonString(aNewGame))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -77,11 +79,5 @@ class GameControllerTest {
 
     }
 
-    public static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 }
