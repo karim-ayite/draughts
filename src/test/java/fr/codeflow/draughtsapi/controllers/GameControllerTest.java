@@ -1,7 +1,7 @@
 package fr.codeflow.draughtsapi.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.codeflow.draughtsapi.model.Game;
+import fr.codeflow.draughtsapi.model.NewGameRequest;
 import fr.codeflow.draughtsapi.model.PieceColors;
 import fr.codeflow.draughtsapi.model.Player;
 import org.junit.jupiter.api.Test;
@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,25 +27,26 @@ class GameControllerTest {
 
     @Test
     public void should_return_a_new_game() throws Exception {
-        var aNewGame = new Game();
+        var aNewGame = new NewGameRequest();
 
         var player1 = new Player();
-        player1.setUsername("username1");
+        player1.setUsername("duke");
         player1.setPieceColor(PieceColors.DARK);
         aNewGame.setPlayer1(player1);
 
         var player2 = new Player();
-        player2.setUsername("username2");
-        player1.setPieceColor(PieceColors.LIGHT);
+        player2.setUsername("nukem");
+        player2.setPieceColor(PieceColors.LIGHT);
         aNewGame.setPlayer2(player2);
 
         this.mockMvc.perform(post("/games")
-                .content(asJsonString(aNewGame))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                        .content(asJsonString(aNewGame))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Hello, World")));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.player1.username").value("duke"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.player2.username").value("nukem"));
     }
 
     public static String asJsonString(final Object obj) {
