@@ -1,5 +1,5 @@
 package fr.codeflow.draughtsapi.model;
 
-public enum PieceColors {
+public enum PiecesColors {
     DARK,LIGHT;
 }

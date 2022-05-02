@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 public class GameController {
 
@@ -15,7 +17,7 @@ public class GameController {
     private GameService gameService;
 
     @PostMapping("/games")
-    AbstractGame newGame(@RequestBody NewGameRequest newGameRequest) {
+    AbstractGame newGame(@Valid @RequestBody NewGameRequest newGameRequest) {
         return gameService.createNewGame(newGameRequest);
     }
 
