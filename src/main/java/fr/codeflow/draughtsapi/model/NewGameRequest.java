@@ -16,6 +16,4 @@ public class NewGameRequest {
      @Valid
      private Player player2;
 
-     @NotNull
-     DraughtsRules rules;
 }

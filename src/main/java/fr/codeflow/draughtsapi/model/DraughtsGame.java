@@ -3,11 +3,13 @@ package fr.codeflow.draughtsapi.model;
 import lombok.Data;
 
 @Data
-public abstract class DraughtsGame {
+public class DraughtsGame {
 
-    protected Player player1;
+    private Player player1;
 
-    protected Player player2;
+    private Player player2;
 
-    protected Board board;
+    private Square[][] board;
+
+
 }

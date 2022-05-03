@@ -1,8 +1,6 @@
 package fr.codeflow.draughtsapi.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.codeflow.draughtsapi.JSonUtils;
-import fr.codeflow.draughtsapi.model.DraughtsRules;
 import fr.codeflow.draughtsapi.model.NewGameRequest;
 import fr.codeflow.draughtsapi.model.PiecesColors;
 import fr.codeflow.draughtsapi.model.Player;
@@ -39,8 +37,6 @@ class GameControllerTest {
         player2.setPiecesColors(PiecesColors.LIGHT);
         aNewGame.setPlayer2(player2);
 
-        aNewGame.setRules(DraughtsRules.INTERNATIONAL);
-
         this.mockMvc.perform(post("/games")
                         .content(JSonUtils.asJsonString(aNewGame))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -51,7 +47,7 @@ class GameControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.player1.piecesColors").value("DARK"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.player2.username").value("nukem"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.player2.piecesColors").value("LIGHT"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.board.squares").exists());
+                .andExpect(MockMvcResultMatchers.jsonPath("$.board").exists());
     }
 
     @Test
@@ -64,9 +60,6 @@ class GameControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'rules')]").exists())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'rules')].object").value("newGameRequest"))
-//                .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'rules')].rejectedValue").value(IsNull.nullValue()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'player2')]").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'player2')].object").value("newGameRequest"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.subErrors[?(@.field == 'player1')]").exists())
