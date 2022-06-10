@@ -1,6 +1,5 @@
 package fr.codeflow.draughtsapi.exception;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -17,17 +16,23 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.Locale;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @Autowired
-    private MessageSource messageSource;
 
-   @Override
+    private final MessageSource messageSource;
+
+    public RestExceptionHandler(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
+
    @ResponseStatus(NOT_FOUND)
+   @Override
    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
        String error = messageSource.getMessage("labels.malformedJson",null,Locale.getDefault());
        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error, ex));
@@ -60,13 +65,5 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(apiError);
     }
 
-    //    @ExceptionHandler(MethodArgumentNotValidException.class)
-//    protected ResponseEntity<Object> handleValidationError(
-//            MethodArgumentNotValidException ex) {
-//        ApiError apiError = new ApiError(BAD_REQUEST);
-//        apiError.getSubErrors().add( new ApiValidationError(ex.getObjectName(),ex.getMessage()));
-//        apiError.setMessage(ex.getMessage());
-//        return buildResponseEntity(apiError);
-//    }
 
 }
