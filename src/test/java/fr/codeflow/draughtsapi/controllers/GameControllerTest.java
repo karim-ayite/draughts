@@ -49,24 +49,44 @@ class GameControllerTest {
         registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
-    private String validCreateRequestAsJson;
 
     @Autowired
     private GameRepository gameRepository;
 
     @BeforeEach
     private void setUp(){
-        CreateGameRequest validCreateGameRequest = new CreateGameRequest("88", PiecesColor.DARK,null);
-        validCreateRequestAsJson = JSonUtils.asJsonString(validCreateGameRequest);
+
+
     }
 
     @Test
-    @DisplayName("Should create a game")
-    void shouldCreateAGame() throws Exception {
+    @DisplayName("Should create a game when playerId is Not Null")
+    void shouldCreateAGameWhenPlayerIdIsNotNull() throws Exception {
+
+        CreateGameRequest validCreateGameRequest = new CreateGameRequest("88", PiecesColor.DARK,null);
+
+        var validCreateRequestAsJson = JSonUtils.asJsonString(validCreateGameRequest);
+
         mockMvc.perform(post("/api/games/").contentType(MediaType.APPLICATION_JSON).content(validCreateRequestAsJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.player1Id").value("88"))
+                .andExpect(jsonPath("$.status").value(GameStatus.WAITING_FOR_PLAYER.name()))
+                .andExpect(jsonPath("$.player1PiecesColor").value(PiecesColor.DARK.name()));
+    }
+
+    @Test
+    @DisplayName("Should create a game when playerId is Null")
+    void shouldCreateAGameWhenPlayerIdIsNull() throws Exception {
+
+        CreateGameRequest validCreateGameRequest = new CreateGameRequest(null, PiecesColor.DARK,"player950");
+
+        var validCreateRequestAsJson = JSonUtils.asJsonString(validCreateGameRequest);
+
+        mockMvc.perform(post("/api/games/").contentType(MediaType.APPLICATION_JSON).content(validCreateRequestAsJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.player1Id").exists())
                 .andExpect(jsonPath("$.status").value(GameStatus.WAITING_FOR_PLAYER.name()))
                 .andExpect(jsonPath("$.player1PiecesColor").value(PiecesColor.DARK.name()));
     }
