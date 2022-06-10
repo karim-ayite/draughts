@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -100,6 +103,18 @@ class GameControllerTest {
                 .andExpect(jsonPath("$.[*]",hasSize(2)));
     }
 
+    @Test
+    @DisplayName("Shound throw a MethodArgumentNotValidException when playerId,nickname are null")
+    void shoundThrowAMethodArgumentNotValidExceptionWhenPlayerIdNicknameAreNull() throws Exception {
+        CreateGameRequest validCreateGameRequest = new CreateGameRequest(null, PiecesColor.DARK,null);
+
+        var validCreateRequestAsJson = JSonUtils.asJsonString(validCreateGameRequest);
+
+        mockMvc.perform(post("/api/games/").contentType(MediaType.APPLICATION_JSON).content(validCreateRequestAsJson))
+                .andExpect(status().is4xxClientError())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException));
+    }
+
     private List<Game> createGames() {
         var games = new ArrayList<Game>();
         var newGame = new Game();
@@ -117,7 +132,6 @@ class GameControllerTest {
         games.add(newGame);
 
         return games;
-
     }
 
 }

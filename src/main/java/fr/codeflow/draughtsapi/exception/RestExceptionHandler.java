@@ -1,5 +1,6 @@
 package fr.codeflow.draughtsapi.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -21,6 +22,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
+@Slf4j
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
 
@@ -31,16 +33,17 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
 
-   @ResponseStatus(NOT_FOUND)
-   @Override
-   protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-       String error = messageSource.getMessage("labels.malformedJson",null,Locale.getDefault());
-       return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error, ex));
-   }
+    @ResponseStatus(NOT_FOUND)
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        log.error("An exception occurred, which will cause a {} response", status, ex);
+        String error = messageSource.getMessage("labels.malformedJson", null, Locale.getDefault());
+        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error, ex));
+    }
 
-   private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
-       return new ResponseEntity<>(apiError, apiError.getStatus());
-   }
+    private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
+        return new ResponseEntity<>(apiError, apiError.getStatus());
+    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(NOT_FOUND)
@@ -53,16 +56,24 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException methodArgumentNotValidException, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        log.warn("An exception occurred, which will cause a {} response", status, methodArgumentNotValidException);
         ApiError apiError = new ApiError(BAD_REQUEST);
-        apiError.setMessage(messageSource.getMessage("labels.validationErrors",null, Locale.getDefault()));
+        apiError.setMessage(messageSource.getMessage("labels.validationErrors", null, Locale.getDefault()));
 
         methodArgumentNotValidException.getFieldErrors()
                 .forEach(fieldError -> {
-                    ApiSubError apiValidationError = new ApiValidationError(fieldError.getObjectName(),fieldError.getField(),fieldError.getRejectedValue(),fieldError.getDefaultMessage());
+                    ApiSubError apiValidationError = new ApiValidationError(fieldError.getObjectName(), fieldError.getField(), fieldError.getRejectedValue(), fieldError.getDefaultMessage());
                     apiError.addSubError(apiValidationError);
                 });
 
         return buildResponseEntity(apiError);
+    }
+
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        log.error("An exception occurred, which will cause a {} response", status, ex);
+        return super.handleExceptionInternal(ex, body, headers, status, request);
     }
 
 
